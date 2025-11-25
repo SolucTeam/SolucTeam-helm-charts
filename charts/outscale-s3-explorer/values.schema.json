@@ -1,0 +1,532 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "title": "Outscale S3 Explorer Helm Chart Configuration",
+  "description": "JSON Schema for validating values.yaml configuration",
+  "required": ["replicaCount", "image", "service"],
+  "properties": {
+    "replicaCount": {
+      "type": "integer",
+      "title": "Number of replicas",
+      "description": "Number of pod replicas to deploy",
+      "minimum": 1,
+      "maximum": 100,
+      "default": 3,
+      "examples": [1, 3, 5]
+    },
+    "image": {
+      "type": "object",
+      "title": "Docker image configuration",
+      "description": "Configuration for the container image",
+      "required": ["repository", "pullPolicy"],
+      "properties": {
+        "repository": {
+          "type": "string",
+          "title": "Image repository",
+          "description": "Docker image repository URL",
+          "pattern": "^[a-z0-9]+(\\.[a-z0-9]+)*(:[0-9]+)?/[a-z0-9_-]+(/[a-z0-9_-]+)*$",
+          "examples": [
+            "ghcr.io/solucteam/outscale-s3-explorer",
+            "myregistry.azurecr.io/outscale-s3-explorer"
+          ]
+        },
+        "tag": {
+          "type": "string",
+          "title": "Image tag",
+          "description": "Docker image tag (version)",
+          "pattern": "^[a-zA-Z0-9._-]+$",
+          "default": "v1.0.0",
+          "examples": ["v1.0.0", "latest", "1.0.0-rc1"]
+        },
+        "pullPolicy": {
+          "type": "string",
+          "title": "Image pull policy",
+          "description": "Kubernetes image pull policy",
+          "enum": ["Always", "IfNotPresent", "Never"],
+          "default": "IfNotPresent"
+        }
+      }
+    },
+    "imagePullSecrets": {
+      "type": "array",
+      "title": "Image pull secrets",
+      "description": "List of Kubernetes secrets for pulling private images",
+      "items": {
+        "type": "object",
+        "required": ["name"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Secret name"
+          }
+        }
+      },
+      "default": []
+    },
+    "nameOverride": {
+      "type": "string",
+      "title": "Name override",
+      "description": "Override the chart name",
+      "maxLength": 63
+    },
+    "fullnameOverride": {
+      "type": "string",
+      "title": "Full name override",
+      "description": "Override the full resource name",
+      "maxLength": 63
+    },
+    "service": {
+      "type": "object",
+      "title": "Service configuration",
+      "description": "Kubernetes Service settings",
+      "required": ["type", "port"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "title": "Service type",
+          "description": "Kubernetes service type",
+          "enum": ["ClusterIP", "NodePort", "LoadBalancer", "ExternalName"],
+          "default": "LoadBalancer"
+        },
+        "port": {
+          "type": "integer",
+          "title": "Service port",
+          "description": "Port to expose the service on",
+          "minimum": 1,
+          "maximum": 65535,
+          "default": 80,
+          "examples": [80, 443, 8080]
+        },
+        "nodePort": {
+          "type": "integer",
+          "title": "Node port",
+          "description": "NodePort to use when service type is NodePort",
+          "minimum": 30000,
+          "maximum": 32767
+        },
+        "annotations": {
+          "type": "object",
+          "title": "Service annotations",
+          "description": "Annotations to add to the service",
+          "additionalProperties": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "ingress": {
+      "type": "object",
+      "title": "Ingress configuration",
+      "description": "Kubernetes Ingress settings",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "title": "Enable Ingress",
+          "description": "Enable or disable Ingress resource creation",
+          "default": true
+        },
+        "className": {
+          "type": "string",
+          "title": "Ingress class name",
+          "description": "Ingress controller class to use",
+          "examples": ["nginx", "traefik", "alb"]
+        },
+        "annotations": {
+          "type": "object",
+          "title": "Ingress annotations",
+          "description": "Annotations for the Ingress resource",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "hosts": {
+          "type": "array",
+          "title": "Ingress hosts",
+          "description": "List of hosts and paths for the Ingress",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["host", "paths"],
+            "properties": {
+              "host": {
+                "type": "string",
+                "title": "Host name",
+                "description": "Hostname for the Ingress rule",
+                "format": "hostname",
+                "examples": ["outscale-s3-explorer.example.com"]
+              },
+              "paths": {
+                "type": "array",
+                "title": "Paths",
+                "description": "List of paths for this host",
+                "minItems": 1,
+                "items": {
+                  "type": "object",
+                  "required": ["path", "pathType"],
+                  "properties": {
+                    "path": {
+                      "type": "string",
+                      "title": "Path",
+                      "description": "URL path",
+                      "default": "/"
+                    },
+                    "pathType": {
+                      "type": "string",
+                      "title": "Path type",
+                      "description": "Path matching type",
+                      "enum": ["Prefix", "Exact", "ImplementationSpecific"],
+                      "default": "Prefix"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tls": {
+          "type": "array",
+          "title": "TLS configuration",
+          "description": "TLS configuration for the Ingress",
+          "items": {
+            "type": "object",
+            "required": ["secretName", "hosts"],
+            "properties": {
+              "secretName": {
+                "type": "string",
+                "title": "TLS secret name",
+                "description": "Name of the Kubernetes secret containing TLS certificate"
+              },
+              "hosts": {
+                "type": "array",
+                "title": "TLS hosts",
+                "description": "List of hosts covered by the TLS certificate",
+                "items": {
+                  "type": "string",
+                  "format": "hostname"
+                },
+                "minItems": 1
+              }
+            }
+          }
+        }
+      }
+    },
+    "resources": {
+      "type": "object",
+      "title": "Resource limits and requests",
+      "description": "CPU and memory resource configuration",
+      "properties": {
+        "limits": {
+          "type": "object",
+          "title": "Resource limits",
+          "description": "Maximum resources the pod can use",
+          "properties": {
+            "cpu": {
+              "type": "string",
+              "title": "CPU limit",
+              "description": "Maximum CPU cores",
+              "pattern": "^[0-9]+(m|\\.[0-9]+)?$",
+              "examples": ["1000m", "1", "2.5"]
+            },
+            "memory": {
+              "type": "string",
+              "title": "Memory limit",
+              "description": "Maximum memory",
+              "pattern": "^[0-9]+(Mi|Gi|M|G)$",
+              "examples": ["1Gi", "512Mi", "2G"]
+            }
+          }
+        },
+        "requests": {
+          "type": "object",
+          "title": "Resource requests",
+          "description": "Minimum resources guaranteed to the pod",
+          "properties": {
+            "cpu": {
+              "type": "string",
+              "title": "CPU request",
+              "description": "Minimum CPU cores",
+              "pattern": "^[0-9]+(m|\\.[0-9]+)?$",
+              "examples": ["500m", "0.5", "1"]
+            },
+            "memory": {
+              "type": "string",
+              "title": "Memory request",
+              "description": "Minimum memory",
+              "pattern": "^[0-9]+(Mi|Gi|M|G)$",
+              "examples": ["512Mi", "256Mi", "1Gi"]
+            }
+          }
+        }
+      }
+    },
+    "autoscaling": {
+      "type": "object",
+      "title": "Horizontal Pod Autoscaler configuration",
+      "description": "HPA settings for automatic scaling",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "title": "Enable autoscaling",
+          "description": "Enable or disable HPA",
+          "default": true
+        },
+        "minReplicas": {
+          "type": "integer",
+          "title": "Minimum replicas",
+          "description": "Minimum number of pod replicas",
+          "minimum": 1,
+          "maximum": 100,
+          "default": 3
+        },
+        "maxReplicas": {
+          "type": "integer",
+          "title": "Maximum replicas",
+          "description": "Maximum number of pod replicas",
+          "minimum": 1,
+          "maximum": 1000,
+          "default": 20
+        },
+        "targetCPUUtilizationPercentage": {
+          "type": "integer",
+          "title": "Target CPU utilization",
+          "description": "Target CPU utilization percentage for scaling",
+          "minimum": 1,
+          "maximum": 100,
+          "default": 70
+        },
+        "targetMemoryUtilizationPercentage": {
+          "type": "integer",
+          "title": "Target memory utilization",
+          "description": "Target memory utilization percentage for scaling",
+          "minimum": 1,
+          "maximum": 100,
+          "default": 80
+        }
+      }
+    },
+    "podAnnotations": {
+      "type": "object",
+      "title": "Pod annotations",
+      "description": "Annotations to add to pods",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "podSecurityContext": {
+      "type": "object",
+      "title": "Pod security context",
+      "description": "Security context for the pod",
+      "properties": {
+        "runAsNonRoot": {
+          "type": "boolean",
+          "title": "Run as non-root",
+          "description": "Run container as non-root user",
+          "default": true
+        },
+        "runAsUser": {
+          "type": "integer",
+          "title": "Run as user ID",
+          "description": "User ID to run the container as",
+          "minimum": 0,
+          "default": 101
+        },
+        "fsGroup": {
+          "type": "integer",
+          "title": "Filesystem group ID",
+          "description": "Group ID for filesystem access",
+          "minimum": 0,
+          "default": 101
+        },
+        "runAsGroup": {
+          "type": "integer",
+          "title": "Run as group ID",
+          "description": "Group ID to run the container as",
+          "minimum": 0
+        }
+      }
+    },
+    "securityContext": {
+      "type": "object",
+      "title": "Container security context",
+      "description": "Security context for the container",
+      "properties": {
+        "allowPrivilegeEscalation": {
+          "type": "boolean",
+          "title": "Allow privilege escalation",
+          "description": "Allow privilege escalation",
+          "default": false
+        },
+        "readOnlyRootFilesystem": {
+          "type": "boolean",
+          "title": "Read-only root filesystem",
+          "description": "Mount root filesystem as read-only",
+          "default": false
+        },
+        "runAsNonRoot": {
+          "type": "boolean",
+          "title": "Run as non-root",
+          "description": "Run container as non-root user",
+          "default": true
+        },
+        "runAsUser": {
+          "type": "integer",
+          "title": "Run as user ID",
+          "description": "User ID to run the container as",
+          "minimum": 0
+        },
+        "capabilities": {
+          "type": "object",
+          "title": "Linux capabilities",
+          "description": "Linux capabilities configuration",
+          "properties": {
+            "drop": {
+              "type": "array",
+              "title": "Drop capabilities",
+              "description": "List of capabilities to drop",
+              "items": {
+                "type": "string"
+              },
+              "default": ["ALL"]
+            },
+            "add": {
+              "type": "array",
+              "title": "Add capabilities",
+              "description": "List of capabilities to add",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "nodeSelector": {
+      "type": "object",
+      "title": "Node selector",
+      "description": "Node labels for pod assignment",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "tolerations": {
+      "type": "array",
+      "title": "Tolerations",
+      "description": "Tolerations for pod assignment",
+      "items": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "operator": {
+            "type": "string",
+            "enum": ["Equal", "Exists"]
+          },
+          "value": {
+            "type": "string"
+          },
+          "effect": {
+            "type": "string",
+            "enum": ["NoSchedule", "PreferNoSchedule", "NoExecute"]
+          }
+        }
+      }
+    },
+    "affinity": {
+      "type": "object",
+      "title": "Affinity rules",
+      "description": "Affinity and anti-affinity rules"
+    },
+    "livenessProbe": {
+      "type": "object",
+      "title": "Liveness probe",
+      "description": "Liveness probe configuration",
+      "properties": {
+        "httpGet": {
+          "type": "object",
+          "properties": {
+            "path": {
+              "type": "string",
+              "default": "/"
+            },
+            "port": {
+              "type": "string",
+              "default": "http"
+            }
+          }
+        },
+        "initialDelaySeconds": {
+          "type": "integer",
+          "minimum": 0,
+          "default": 40
+        },
+        "periodSeconds": {
+          "type": "integer",
+          "minimum": 1,
+          "default": 30
+        },
+        "timeoutSeconds": {
+          "type": "integer",
+          "minimum": 1,
+          "default": 10
+        },
+        "successThreshold": {
+          "type": "integer",
+          "minimum": 1,
+          "default": 1
+        },
+        "failureThreshold": {
+          "type": "integer",
+          "minimum": 1,
+          "default": 3
+        }
+      }
+    },
+    "readinessProbe": {
+      "type": "object",
+      "title": "Readiness probe",
+      "description": "Readiness probe configuration",
+      "properties": {
+        "httpGet": {
+          "type": "object",
+          "properties": {
+            "path": {
+              "type": "string",
+              "default": "/"
+            },
+            "port": {
+              "type": "string",
+              "default": "http"
+            }
+          }
+        },
+        "initialDelaySeconds": {
+          "type": "integer",
+          "minimum": 0,
+          "default": 10
+        },
+        "periodSeconds": {
+          "type": "integer",
+          "minimum": 1,
+          "default": 10
+        },
+        "timeoutSeconds": {
+          "type": "integer",
+          "minimum": 1,
+          "default": 5
+        },
+        "successThreshold": {
+          "type": "integer",
+          "minimum": 1,
+          "default": 1
+        },
+        "failureThreshold": {
+          "type": "integer",
+          "minimum": 1,
+          "default": 3
+        }
+      }
+    }
+  }
+}
