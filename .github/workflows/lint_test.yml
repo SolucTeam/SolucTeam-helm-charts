@@ -1,0 +1,107 @@
+name: Lint and test charts
+
+# Controls when the action will run. Triggers the workflow on pull request
+# events but only for the main branch
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  prepare:
+    name: "Prepare requirements"
+    runs-on: ubuntu-latest
+    outputs:
+      charts: ${{ steps.list-changed.outputs.charts }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Set up helm
+        uses: './.github/actions/setup-helm'
+
+      - name: Set up test
+        uses: './.github/actions/setup-test'
+
+      - name: List changed charts
+        id: list-changed
+        run: |
+          changed=$(ct --config ct.yaml list-changed)
+          json_charts="[]"
+          if [[ -n "$changed" ]]; then
+            json_charts="[\"$(echo $changed | sed 's/ /", "/g')\"]"
+          fi
+          echo "charts=${json_charts}" >> "$GITHUB_OUTPUT"
+
+  lint:
+    name: "Lint"
+    needs: prepare
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-latest
+        chart: ${{ fromJson(needs.prepare.outputs.charts) }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Set up helm
+        uses: './.github/actions/setup-helm'
+
+      - name: Set up test
+        uses: './.github/actions/setup-test'
+
+      - name: Run chart-testing (lint)
+        run: ct lint --config ct.yaml
+
+  test:
+    name: "Test"
+    needs: prepare
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-latest
+        chart: ${{ fromJson(needs.prepare.outputs.charts) }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Set up helm
+        uses: './.github/actions/setup-helm'
+
+      - name: Set up test
+        uses: './.github/actions/setup-test'
+
+      - name: Create kind cluster
+        uses: helm/kind-action@v1.12.0
+
+      - name: Install CRDs
+        env:
+          CHART_NAME: ${{ matrix.chart }}
+        run: |
+          # Prometheus
+          helm repo add prometheus-community https://prometheus-community.github.io/helm-charts --force-update
+          helm install prometheus-operator-crds prometheus-community/prometheus-operator-crds --version 4.0.0
+          # Istio
+          if [[ "$CHART_NAME" != *"istio-operator-crds" ]]; then
+            helm repo add wiremind https://wiremind.github.io/wiremind-helm-charts --force-update
+            helm install istio-operator-crds wiremind/istio-operator-crds --version 1.18.2
+          fi
+          # csi-driver-host-path
+          if [[ "$CHART_NAME" == *"csi-driver-host-path" ]]; then
+            helm repo add wiremind https://wiremind.github.io/wiremind-helm-charts --force-update
+            helm install snapshot-controller-crds wiremind/snapshot-controller-crds --version 6.2.1
+          fi
+
+      - name: Run chart-testing (install)
+        run: ct install --config ct.yaml --helm-extra-args "--timeout 300s"
