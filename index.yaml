@@ -1,0 +1,52 @@
+apiVersion: v1
+entries:
+  outscale-s3-explorer:
+  - annotations:
+      artifacthub.io/category: storage
+      artifacthub.io/changes: |
+        - kind: added
+          description: Première version publique du chart Helm
+        - kind: added
+          description: Support complet de l'authentification Outscale S3
+        - kind: added
+          description: Interface web moderne React/TypeScript
+        - kind: added
+          description: Support multi-régions Outscale
+      artifacthub.io/displayName: Outscale S3 Explorer
+      artifacthub.io/license: Apache-2.0
+      artifacthub.io/links: |
+        - name: Documentation
+          url: https://github.com/SolucTeam/outscale-s3-explorer/blob/main/README.md
+        - name: Source
+          url: https://github.com/SolucTeam/outscale-s3-explorer
+      artifacthub.io/operator: "false"
+      artifacthub.io/prerelease: "false"
+      artifacthub.io/recommendations: |
+        - url: https://artifacthub.io/packages/helm/cert-manager/cert-manager
+    apiVersion: v2
+    appVersion: 1.0.0
+    created: "2025-11-26T02:45:15.537515342Z"
+    description: Interface web moderne pour la gestion d'objets S3 compatible Outscale
+    digest: 218bf9ac02139ed9d9e8fce0208a3b26d9b459c5cb1c58535261bcf214983225
+    home: https://github.com/SolucTeam/outscale-s3-explorer
+    keywords:
+    - outscale
+    - s3
+    - storage
+    - object-storage
+    - web-interface
+    - cloud
+    - bucket
+    - oos
+    maintainers:
+    - email: k.aziz.k@live.fr
+      name: SolucTeam
+      url: https://github.com/SolucTeam
+    name: outscale-s3-explorer
+    sources:
+    - https://github.com/SolucTeam/outscale-s3-explorer
+    type: application
+    urls:
+    - https://github.com/SolucTeam/SolucTeam-helm-charts/releases/download/outscale-s3-explorer-0.1.0/outscale-s3-explorer-0.1.0.tgz
+    version: 0.1.0
+generated: "2025-11-26T02:45:15.537524158Z"
