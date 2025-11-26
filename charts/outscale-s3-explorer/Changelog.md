@@ -14,6 +14,11 @@ et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 ---
 
+## [0.1.1] - 2025-11-26
+
+### Changed
+- Initial release
+
 ## [0.1.0] - 2025-01-24
 
 ### 🎉 Première version publique
