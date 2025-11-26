@@ -5,7 +5,7 @@
 # ⚠️ IMPORTANT: Le repositoryID sera fourni par Artifact Hub après l'enregistrement
 # Laissez cette valeur temporaire, puis revenez la modifier après avoir ajouté
 # votre repository sur https://artifacthub.io/
-repositoryID: d109cb2a-3a01-463f-b599-1cd5babfe411
+repositoryID: 31cb6309-1f89-424e-af3e-ef651bd6673b
 
 # Propriétaires du repository (requis pour la vérification)
 owners:
