@@ -14,10 +14,10 @@ et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 ---
 
-## [0.1.1] - 2025-11-26
+## [0.1.2] - 2025-11-27
 
 ### Changed
-- Initial release
+- fix: support hyphens and complex registry URLs in image.repository pattern
 
 ## [0.1.0] - 2025-01-24
 

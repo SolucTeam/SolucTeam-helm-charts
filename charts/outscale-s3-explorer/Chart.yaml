@@ -2,7 +2,7 @@ apiVersion: v2
 name: outscale-s3-explorer
 description: Interface web moderne pour la gestion d'objets S3 compatible Outscale
 type: application
-version: 0.1.1
+version: 0.1.2
 appVersion: "1.0.0"
 
 # URLs du projet
