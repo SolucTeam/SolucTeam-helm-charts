@@ -2,17 +2,17 @@
   "$schema": "https://json-schema.org/draft-07/schema#",
   "type": "object",
   "title": "Outscale S3 Explorer Helm Chart Configuration",
-  "description": "JSON Schema for validating values.yaml configuration",
+  "description": "JSON Schema for validating values.yaml configuration (WITHOUT autoscaling)",
   "required": ["replicaCount", "image", "service"],
   "properties": {
     "replicaCount": {
       "type": "integer",
       "title": "Number of replicas",
-      "description": "Number of pod replicas to deploy",
+      "description": "Number of pod replicas to deploy (FIXED - no autoscaling)",
       "minimum": 1,
-      "maximum": 100,
-      "default": 3,
-      "examples": [1, 3, 5]
+      "maximum": 10,
+      "default": 2,
+      "examples": [1, 2, 3]
     },
     "image": {
       "type": "object",
@@ -24,10 +24,11 @@
           "type": "string",
           "title": "Image repository",
           "description": "Docker image repository URL",
-          "pattern": "^[a-z0-9]+(\\.[a-z0-9]+)*(:[0-9]+)?/[a-z0-9_-]+(/[a-z0-9_-]+)*$",
+          "pattern": "^[a-zA-Z0-9]+([-.]?[a-zA-Z0-9]+)*(:[0-9]+)?/[a-zA-Z0-9_-]+([-/][a-zA-Z0-9_-]+)*$",
           "examples": [
             "ghcr.io/solucteam/outscale-s3-explorer",
-            "myregistry.azurecr.io/outscale-s3-explorer"
+            "ghcr.io/SolucTeam/outscale-s3-explorer",
+            "registry.example.com/outscale-s3-explorer"
           ]
         },
         "tag": {
@@ -85,8 +86,8 @@
           "type": "string",
           "title": "Service type",
           "description": "Kubernetes service type",
-          "enum": ["ClusterIP", "NodePort", "LoadBalancer", "ExternalName"],
-          "default": "LoadBalancer"
+          "enum": ["ClusterIP", "NodePort", "LoadBalancer"],
+          "default": "ClusterIP"
         },
         "port": {
           "type": "integer",
@@ -129,7 +130,7 @@
           "type": "string",
           "title": "Ingress class name",
           "description": "Ingress controller class to use",
-          "examples": ["nginx", "traefik", "alb"]
+          "examples": ["nginx", "nginx-external", "traefik"]
         },
         "annotations": {
           "type": "object",
@@ -257,51 +258,6 @@
               "examples": ["512Mi", "256Mi", "1Gi"]
             }
           }
-        }
-      }
-    },
-    "autoscaling": {
-      "type": "object",
-      "title": "Horizontal Pod Autoscaler configuration",
-      "description": "HPA settings for automatic scaling",
-      "properties": {
-        "enabled": {
-          "type": "boolean",
-          "title": "Enable autoscaling",
-          "description": "Enable or disable HPA",
-          "default": true
-        },
-        "minReplicas": {
-          "type": "integer",
-          "title": "Minimum replicas",
-          "description": "Minimum number of pod replicas",
-          "minimum": 1,
-          "maximum": 100,
-          "default": 3
-        },
-        "maxReplicas": {
-          "type": "integer",
-          "title": "Maximum replicas",
-          "description": "Maximum number of pod replicas",
-          "minimum": 1,
-          "maximum": 1000,
-          "default": 20
-        },
-        "targetCPUUtilizationPercentage": {
-          "type": "integer",
-          "title": "Target CPU utilization",
-          "description": "Target CPU utilization percentage for scaling",
-          "minimum": 1,
-          "maximum": 100,
-          "default": 70
-        },
-        "targetMemoryUtilizationPercentage": {
-          "type": "integer",
-          "title": "Target memory utilization",
-          "description": "Target memory utilization percentage for scaling",
-          "minimum": 1,
-          "maximum": 100,
-          "default": 80
         }
       }
     },
