@@ -10,11 +10,4 @@ repositoryID: 31cb6309-1f89-424e-af3e-ef651bd6673b
 # Propriétaires du repository (requis pour la vérification)
 owners:
   - name: SolucTeam
-    email: k.aziz.k@libe.fr
-# Optionnel : Ignorer certains packages
-# ignore:
-#   - name: package-name
-
-# Optionnel : Métadonnées supplémentaires
-# displayName: Outscale S3 Explorer Charts
-# description: Charts Helm officiels pour Outscale S3 Explorer
+    email: k.aziz.k@live.fr
