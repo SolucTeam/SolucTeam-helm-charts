@@ -11,6 +11,12 @@ image:
   tag: "v1.0.0"
   pullPolicy: IfNotPresent
 
+# Secrets pour accéder à un registry privé
+# Exemple :
+# imagePullSecrets:
+#   - name: ghcr-secret
+imagePullSecrets: []
+
 # Configuration du Service
 service:
   type: LoadBalancer
